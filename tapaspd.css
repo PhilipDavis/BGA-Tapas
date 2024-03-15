@@ -1,0 +1,318 @@
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * TapasPD implementation : © Copyright 2024, Philip Davis (mrphilipadavis AT gmail)
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ */
+
+#tap_surface * {
+    box-sizing: border-box;
+}
+
+#tap_table {
+    position: relative;
+    float: left;
+    height: 43em;
+    display: inline-flex;
+    flex-direction: row;
+}
+
+.tap_inventory {
+    position: relative;
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 5.25em;
+}
+.tap_inventory-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    margin: 0.5em 0;
+    border: dashed 0.2em rgba(0, 0, 0, 0);
+    border-radius: 1em;
+    transition: all .2s ease-out;
+    pointer-events: none;
+}
+.tap_inventory-group:empty {
+    border: dashed 0.2em rgba(0, 0, 0, 0) !important;
+}
+.tap_inventory.tap_selectable .tap_inventory-group {
+    border: dashed 0.2em rgba(0, 0, 0, .9);
+    cursor: pointer;
+    pointer-events: all;
+}
+.tap_inventory-croq.tap_selectable .tap_inventory-group {
+    border: dashed .2em rgba(235, 225, 200, .85);
+}
+.tap_inventory-croq.tap_selectable .tap_inventory-group:hover,
+.tap_inventory-croq.tap_selectable .tap_inventory-group:active {
+    border: dashed .2em rgba(249, 245, 237, .85);
+}
+.tap_inventory-jala.tap_selectable .tap_inventory-group {
+    border: dashed .2em rgba(1, 31, 68, .75);
+}
+.tap_inventory-jala.tap_selectable .tap_inventory-group:hover,
+.tap_inventory-jala.tap_selectable .tap_inventory-group:active {
+    border: dashed .2em rgba(2, 54, 118, .75);
+}
+
+.tap_inventory.tap_selectable .tap_inventory-group:hover:after,
+.tap_inventory.tap_selectable .tap_inventory-group:active:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 1em;
+    background-color: rgba(255, 255, 255, .2);
+    content: ' ';
+    pointer-events: none;
+}
+
+.tap_inventory:has(.tap_selected) .tap_inventory-group:not(.tap_selected) {
+    opacity: .75;
+    border-color: transparent;
+}
+
+.tap_inventory .tap_tile {
+    position: relative;
+    margin-top: -3em;
+    left: 0;
+    top: 0;
+}
+.tap_inventory .tap_tile:first-child {
+    margin-top: 0;
+}
+
+#tap_board-wrapper {
+    position: relative;
+    padding: 6em;
+    height: 43em;
+    width: 43em;
+    flex: 0 0 auto;
+}
+
+#tap_board {
+    position: absolute;
+    display: inline-block;
+    background-size: contain;
+    width: 31em;
+    height: 31em;
+}
+.tap_board-1 { background-image: url(img/tapas_board-1-med.png); }
+.tap_board-2 { background-image: url(img/tapas_board-2-med.png); }
+.tap_board-3 { background-image: url(img/tapas_board-3-med.png); }
+.tap_board-4 { background-image: url(img/tapas_board-4-med.png); }
+
+
+/* Tiles */
+
+.tap_tile {
+    display: inline-block;
+    background-image: url(img/tapas_tiles-med.png);
+    background-size: 12em 42em;
+    width: 5em;
+    height: 5em;
+    left: 1.5em;
+    top: 1.5em;
+}
+.tap_tile-1  { background-position-x: -0.5em; background-position-y:  -0.5em; }
+.tap_tile-2  { background-position-x: -0.5em; background-position-y:  -6.5em; }
+.tap_tile-3  { background-position-x: -0.5em; background-position-y: -12.5em; }
+.tap_tile-4  { background-position-x: -0.5em; background-position-y: -18.5em; }
+.tap_tile-9  { background-position-x: -0.5em; background-position-y: -24.5em; }
+.tap_tile-11 { background-position-x: -0.5em; background-position-y: -30.5em; }
+.tap_tile-13 { background-position-x: -0.5em; background-position-y: -36.5em; }
+
+.tap_tile-5  { background-position-x: -6.5em; background-position-y:   -0.5em; }
+.tap_tile-6  { background-position-x: -6.5em; background-position-y:  -6.5em; }
+.tap_tile-7  { background-position-x: -6.5em; background-position-y: -12.5em; }
+.tap_tile-8  { background-position-x: -6.5em; background-position-y: -18.5em; }
+.tap_tile-10 { background-position-x: -6.5em; background-position-y: -24.5em; }
+.tap_tile-12 { background-position-x: -6.5em; background-position-y: -30.5em; }
+.tap_tile-14 { background-position-x: -6.5em; background-position-y: -36.5em; }
+
+#tap_board-wrapper .tap_tile {
+    position: absolute;
+}
+
+.tap_slot {
+    position: absolute;
+    display: inline-block;
+    width: 5em;
+    height: 5em;
+    left: 1.5em;
+    top: 1.5em;
+    border-radius: 1em;
+    cursor: pointer;
+    transition: all .2s ease-out;
+}
+.tap_slot:hover {
+    opacity: 1 !important;
+}
+.tap_slot:hover:after,
+.tap_slot:active:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 1em;
+    content: ' ';
+    pointer-events: none;
+    background-color: rgba(255, 255, 255, .2);
+}
+.tap_slot-croq {
+    border: dashed .2em rgba(235, 225, 200, .85);
+}
+.tap_slot-croq:hover,
+.tap_slot-croq:active {
+    border: dashed .2em rgba(249, 245, 237, .85);
+}
+.tap_slot-jala {
+    border: dashed .2em rgba(1, 31, 68, .75);
+}
+.tap_slot-jala:hover,
+.tap_slot-jala:active {
+    border: dashed .2em rgba(2, 54, 118, .75);
+}
+
+#tap_surface:has(.tap_slot.tap_selected) .tap_slot:not(.tap_selected) {
+    opacity: .75;
+}
+.tap_slot-croq.tap_selected {
+    border: dashed .2em rgba(235, 225, 200, 1);
+}
+.tap_slot-jala.tap_selected {
+    border: dashed .2em rgba(1, 31, 68, 1);
+}
+.tap_slot.tap_selected:after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 1em;
+    content: ' ';
+    pointer-events: none;
+    background-color: rgba(255, 255, 255, .2);
+}
+
+
+/* Arrow */
+
+.tap_arrow {
+    position: absolute;
+    display: inline-block;
+    background-image: url(img/tapas_arrows-high.png);
+    background-size: 6em 6em;
+    width: 3em;
+    height: 3em;
+    opacity: .75;
+    z-index: 10;
+    pointer-events: none;
+    transition: opacity .2s ease-out, transform .5s ease-out;
+    opacity: 0;
+}
+.tap_arrow-right { background-position:  0em  0em; left: 2.75em; top: .9em; }
+.tap_arrow-down  { background-position: -3em  0em; left: .9em; top: 2.75em; }
+.tap_arrow-left  { background-position: -3em -3em; left: -1em; top: .9em; }
+.tap_arrow-up    { background-position:  0em -3em; left: .9em; top: -1em; }
+
+.tap_slot:hover .tap_arrow { opacity: .75; }
+.tap_slot:hover .tap_arrow-right { transform: translate(1em, 0); }
+.tap_slot:hover .tap_arrow-down  { transform: translate(0, 1em); }
+.tap_slot:hover .tap_arrow-left  { transform: translate(-1em, 0); }
+.tap_slot:hover .tap_arrow-up    { transform: translate(0, -1em); }
+.tap_slot.tap_selected .tap_arrow { opacity: .75; }
+.tap_slot.tap_selected .tap_arrow-right { transform: translate(1em, 0); }
+.tap_slot.tap_selected .tap_arrow-down  { transform: translate(0, 1em); }
+.tap_slot.tap_selected .tap_arrow-left  { transform: translate(-1em, 0); }
+.tap_slot.tap_selected .tap_arrow-up    { transform: translate(0, -1em); }
+
+.tap_dir-slot .tap_arrow {
+    opacity: 1;
+    transition: none;
+    pointer-events: none;
+}
+.tap_dir-slot:hover .tap_arrow {
+    opacity: 1;
+    transform: none !important;
+}
+.tap_dir-slot .tap_arrow-right { left: -1em; }
+.tap_dir-slot .tap_arrow-down  { top: -1em; }
+.tap_dir-slot .tap_arrow-left  { left: 2.75em; }
+.tap_dir-slot .tap_arrow-up    { top: 2.75em; }
+
+
+/* Captured Area */
+
+.tap_icon {
+    display: inline-block;
+    background-image: url(img/tapas_tiles-med.png);
+    background-size: 4em 14em;
+    width: 2em;
+    height: 2em;
+}
+.tap_icon-croq   { background-position-x:  0em; background-position-y:  0em; }
+.tap_icon-jala   { background-position-x: -2em; background-position-y:  0em; }
+.tap_icon-ticket { background-position-x:  0em; background-position-y: -8em; }
+
+.tap_captured {
+    position: relative;
+    float: left;
+    width: 52em;
+    margin: 1em;
+    padding: 0 1em 1em 1em;
+}
+.tap_captured h2 {
+    white-space: nowrap;
+}
+.tap_captured h2 span {
+    vertical-align: middle;
+}
+.tap_captured .tap_tile {
+    position: relative !important;
+    pointer-events: none;
+    left: 0;
+    top: 0;
+}
+.tap_captured .tap_score {
+    margin-left: 0.5em;
+    font-size: .9em;
+    font-weight: 400;
+    opacity: .9;
+}
+
+
+/* Log messages */
+
+.tap_log-tile {
+    display: inline-block;
+    background-image: url(img/tapas_tiles-med.png);
+    background-size: 6em 21em;
+    width: 3em;
+    height: 3em;
+    vertical-align: middle;
+}
+.tap_log-tile-1  { background-position-x: 0em; background-position-y:   0em; }
+.tap_log-tile-2  { background-position-x: 0em; background-position-y:  -3em; }
+.tap_log-tile-3  { background-position-x: 0em; background-position-y:  -6em; }
+.tap_log-tile-4  { background-position-x: 0em; background-position-y:  -9em; }
+.tap_log-tile-9  { background-position-x: 0em; background-position-y: -12em; }
+.tap_log-tile-11 { background-position-x: 0em; background-position-y: -15em; }
+.tap_log-tile-13 { background-position-x: 0em; background-position-y: -18em; }
+
+.tap_log-tile-5  { background-position-x: -3em; background-position-y:   0em; }
+.tap_log-tile-6  { background-position-x: -3em; background-position-y:  -3em; }
+.tap_log-tile-7  { background-position-x: -3em; background-position-y:  -6em; }
+.tap_log-tile-8  { background-position-x: -3em; background-position-y:  -9em; }
+.tap_log-tile-10 { background-position-x: -3em; background-position-y: -12em; }
+.tap_log-tile-12 { background-position-x: -3em; background-position-y: -15em; }
+.tap_log-tile-14 { background-position-x: -3em; background-position-y: -18em; }

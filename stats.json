@@ -1,0 +1,79 @@
+{
+    "player": {
+        "max_capture": {
+            "id": 10,
+            "name": "Most points captured in one move",
+            "type": "int"
+        },
+        "num_captures": {
+            "id": 11,
+            "name": "Number of capturing moves",
+            "type": "int"
+        },
+        "header_points": {
+            "id": 20,
+            "name": "Points Captured",
+            "type": "int"
+        },
+        "points_capturing_1": {
+            "id": 21,
+            "name": "Points from capturing single Tapas",
+            "type": "int"
+        },
+        "points_capturing_2": {
+            "id": 22,
+            "name": "Points from capturing double Tapas",
+            "type": "int"
+        },
+        "points_capturing_3": {
+            "id": 23,
+            "name": "Points from capturing triple Tapas",
+            "type": "int"
+        },
+        "points_capturing_4": {
+            "id": 24,
+            "name": "Points from capturing quadruple Tapas",
+            "type": "int"
+        },
+        "points_capturing_extras": {
+            "id": 25,
+            "name": "Points from capturing Extras Tapas",
+            "type": "int"
+        },
+        "points_from_opponent": {
+            "id": 26,
+            "name": "Points surrendered by opponent",
+            "type": "int"
+        },
+        "header_efficiency": {
+            "id": 30,
+            "name": "Tile Efficiency",
+            "type": "int"
+        },
+        "points_playing_1": {
+            "id": 31,
+            "name": "Points from playing single Tapas",
+            "type": "int"
+        },
+        "points_playing_2": {
+            "id": 32,
+            "name": "Points from playing double Tapas",
+            "type": "int"
+        },
+        "points_playing_3": {
+            "id": 33,
+            "name": "Points from playing triple Tapas",
+            "type": "int"
+        },
+        "points_playing_4": {
+            "id": 34,
+            "name": "Points from playing quadruple Tapas",
+            "type": "int"
+        },
+        "points_surrendered": {
+            "id": 35,
+            "name": "Points surrendered to opponent",
+            "type": "int"
+        }
+    }
+}

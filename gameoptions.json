@@ -1,0 +1,24 @@
+{
+    "100": {
+        "name": "Red Mojo variation",
+        "values": {
+            "1": {
+                "name": "No",
+                "tmdisplay": "Classic game rules"
+            },
+            "2": {
+                "name": "Yes - 2 Extras tiles",
+                "tmdisplay": "The game is played in the same way as the classic version, and Extras tiles can have an immediate effect when they are removed from the board, or when points are calculated at the end of the game."
+            },
+            "3": {
+                "name": "Yes - 3 Extras tiles",
+                "tmdisplay": "The game is played in the same way as the classic version, and Extras tiles can have an immediate effect when they are removed from the board, or when points are calculated at the end of the game."
+            },
+            "4": {
+                "name": "Yes - 5 Extras tiles",
+                "tmdisplay": "The game is played in the same way as the classic version, and Extras tiles can have an immediate effect when they are removed from the board, or when points are calculated at the end of the game."
+            }
+        },
+        "default": "1"
+    }
+}
