@@ -138,6 +138,7 @@ class Tapas
                     'captured' => [],
                 ],
             ],
+            'lastMove' => [ 0, 0, 0, 0 ], // x, y, dx, dy
             'rotations' => 0, // For Burning Head variation
             'removed' => [],
             'board' => $board,
@@ -215,6 +216,8 @@ class Tapas
         
         if (!$this->isLegalMove($legalMoves, $x, $y, $dx, $dy))
             return false;
+
+        $this->data->lastMove = [ $x, $y, $dx, $dy ];
 
         $playerId = $this->getNextPlayerId();
         $otherPlayerId = $this->getOtherPlayerId();
@@ -463,6 +466,9 @@ class Tapas
             }
         }
 
+        // Cannot push back on the line that was just pushed
+        $legalMoves = array_values(array_filter($legalMoves, fn($move) => !$this->isPushingOppositeToLastMove($move)));
+
         if ($this->getOption('burningHead'))
         {
             // Active player may only play tiles from his/her facing side of the board
@@ -502,6 +508,19 @@ class Tapas
         }
 
         return $legalMoves;
+    }
+
+    public function isPushingOppositeToLastMove($move)
+    {
+        // Is pushing back on the same column (same x but opposite dx)
+        if ($move[0] == $this->data->lastMove[0] && $move[2] == -$this->data->lastMove[2])
+            return true;
+
+        // Is pushing back on the same row (same y but opposite dy)
+        if ($move[1] == $this->data->lastMove[1] && $move[3] == -$this->data->lastMove[3])
+            return true;
+
+        return false;
     }
 
     static public function rotateDirectionCcw($dir)
