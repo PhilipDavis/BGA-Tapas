@@ -122,7 +122,7 @@ class TapasPD extends Table
         $tapas = $this->loadGameState();
         return [
             'tapas' => $tapas->getPlayerData($currentPlayerId),
-            'scores' => $tapas->getScores(),
+            'scores' => $tapas->getScores($playerIdWithKetchupMayoWasabi),
         ];
     }
 
@@ -240,9 +240,25 @@ class TapasPD extends Table
         //
         // Update score in the database
         //
-        $scores = $tapas->getScores();
+        $playerIdWithKetchupMayoWasabi = 0;
+        $scores = $tapas->getScores($playerIdWithKetchupMayoWasabi);
         $scoresAux = $tapas->getTieBreakerScores();
         $previousScores = $this->getPlayerScores();
+
+        // Adjust for Ketchup, Mayo, Wasabi -- which ends the game
+        // but it's possible to collect all three and still have a 
+        // lower score. So we need to hack the score to ensure the
+        // winner is correctly identified by BGA.
+        if ($playerIdWithKetchupMayoWasabi)
+        {
+            $loserPlayerIds = array_filter(array_keys((array)$scores), fn($id) => $id != $playerIdWithKetchupMayoWasabi);
+            $loserPlayerId = $loserPlayerIds[array_key_first($loserPlayerIds)]; // There must be a better way...
+            $loserScore = $scores[$loserPlayerId];
+            $winnerScore = $scores[$playerIdWithKetchupMayoWasabi];
+            if ($winnerScore < $loserScore)
+                $scores[$playerIdWithKetchupMayoWasabi] = $loserScore + 1;
+        }
+
         foreach ($scores as $playerId => $score)
             $this->setPlayerScore($playerId, $score, $scoresAux[$playerId]);
 
@@ -316,7 +332,17 @@ class TapasPD extends Table
         }
 
         // Capturing the napkin tile will cause the player to have another turn
-        if ($tapas->getNextPlayerId() == $activePlayerId)
+        // (unless the game is over now from ketchup, mayo, and wasabi)
+        if ($playerIdWithKetchupMayoWasabi)
+        {
+            $this->notifyAllPlayers('earlyFinish', clienttranslate('${playerName} has captured all three of ${tileId1:getTileHtml}, ${tileId2:getTileHtml}, and ${tileId3:getTileHtml}'), [
+                'playerName' => $this->getPlayerNameById($activePlayerId),
+                'tileId1' => 38, // ketchup
+                'tileId2' => 39, // mayo
+                'tileId3' => 40, // wasabi
+            ]);
+        }
+        else if ($tapas->getNextPlayerId() == $activePlayerId)
         {
             $this->notifyAllPlayers('playAgain', clienttranslate('${playerName} gets to play again'), [
                 'playerName' => $this->getPlayerNameById($activePlayerId),

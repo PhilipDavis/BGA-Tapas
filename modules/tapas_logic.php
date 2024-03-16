@@ -51,9 +51,9 @@ class Tapas
         $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_CROQ_4, 'tapas' => 'croq', 'value' => 4 ];
         
         $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_TOAST, 'tapas' => 'extra' ];
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_KETCHUP, 'tapas' => 'extra' ];
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_MAYO, 'tapas' => 'extra' ];
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_WASABI, 'tapas' => 'extra' ];
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_KETCHUP, 'tapas' => 'extra' ]; // 38
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_MAYO, 'tapas' => 'extra' ]; // 39
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_WASABI, 'tapas' => 'extra' ]; // 40
         $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_NAPKIN, 'tapas' => 'extra' ];
         $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_TICKET, 'tapas' => 'extra' ];
     }
@@ -374,6 +374,12 @@ class Tapas
         foreach ($this->data->players as $player)
             $inventoryCount += count($player->inventory);
 
+        // According to new rules, the game is over immediately if
+        // a player collects all three of ketchup, mayo, and wasabi.
+        $this->getScores($playerIdWithKetchupMayoWasabi);
+        if ($playerIdWithKetchupMayoWasabi)
+            return 100;
+
         return 100 * ($startingInventory - $inventoryCount) / $startingInventory;
     }
 
@@ -547,9 +553,11 @@ class Tapas
         return $this->data->board;
     }
 
-    public function getScores()
+    public function getScores(&$playerIdWithKetchupMayoWasabi)
     {
-        $playerScores = array_map(function($player) {
+        $playerScores = [];
+        foreach ($this->data->players as $playerId => $player)
+        {
             $sum = 0;
             $countOfKetchupMayoWasabi = 0;
             foreach ($player->captured as $tileId)
@@ -568,11 +576,15 @@ class Tapas
             {
                 case 1: $sum += 2; break;
                 case 2: $sum += 5; break;
-                case 3: $sum += 10; break;
+                case 3: $sum += 10;
+                    // Note: the pre-release rules said Ketchup + Mayo + Wasabi was worth 10 points
+                    // but the final rules don't say anything about points for this. Instead, the
+                    // player who collects all three automatically wins the game.
+                    $playerIdWithKetchupMayoWasabi = $playerId;
+                    break;
             }
-            return $sum;
-        }, (array)$this->data->players);
-        
+            $playerScores[$playerId] = $sum;
+        }
         return $playerScores;
     }
 
