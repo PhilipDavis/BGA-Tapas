@@ -27,6 +27,7 @@
     flex-direction: column;
     justify-content: center;
     min-width: 5.25em;
+    z-index: 0;
 }
 .tap_inventory-group {
     position: relative;
@@ -96,6 +97,7 @@
     height: 43em;
     width: 43em;
     flex: 0 0 auto;
+    z-index: 1;
 }
 
 #tap_board {
