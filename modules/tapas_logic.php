@@ -512,12 +512,12 @@ class Tapas
 
     public function isPushingOppositeToLastMove($move)
     {
-        // Is pushing back on the same column (same x but opposite dx)
-        if ($move[0] == $this->data->lastMove[0] && $move[2] == -$this->data->lastMove[2])
+        // Is pushing back on the same column (same x but opposite dy)
+        if ($move[0] == $this->data->lastMove[0] && $move[3] && $move[3] == -$this->data->lastMove[3])
             return true;
 
-        // Is pushing back on the same row (same y but opposite dy)
-        if ($move[1] == $this->data->lastMove[1] && $move[3] == -$this->data->lastMove[3])
+        // Is pushing back on the same row (same y but opposite dx)
+        if ($move[1] == $this->data->lastMove[1] && $move[2] && $move[2] == -$this->data->lastMove[2])
             return true;
 
         return false;
