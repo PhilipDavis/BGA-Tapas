@@ -171,11 +171,11 @@ function (dojo, declare, aspect) {
             {
                 const tapasType = this.tapas.players[playerId].tapas;
                 this.createInventory(playerId, index++, tapasType);
-                for (const tileId of player.inventory) {
+                for (const tileId of [ ...player.inventory ].sort((a, b) => b - a)) {
                     this.createTileInInventory(tileId, playerId);
                 }
 
-                for (const tileId of player.captured) {
+                for (const tileId of [ ...player.captured ].sort((a, b) => b - a)) {
                     this.createTileInCaptured(tileId, playerId);
                 }
 
