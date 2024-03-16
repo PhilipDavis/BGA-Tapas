@@ -251,8 +251,11 @@ function (dojo, declare, aspect) {
                 case 'playerTurn':
                     const { moves } = state.args;
                     this.clientStateArgs.legalMoves = moves;
-                    this.createSlotsForLegalMoves(moves);
                     document.getElementById(`tap_inventory-${this.myPlayerId}`).classList.add('tap_selectable');
+                    break;
+
+                case 'client_selectSlot':
+                    this.createSlotsForLegalMoves(this.clientStateArgs.legalMoves);
                     break;
 
                 case 'client_selectDirection':
@@ -272,7 +275,11 @@ function (dojo, declare, aspect) {
             switch (stateName) {
                 case 'playerTurn':
                     this.destroyAllSlots();
+                    break;
+
+                case 'client_selectSlot':
                     document.getElementById(`tap_inventory-${this.myPlayerId}`).classList.remove('tap_selectable');
+                    this.destroyAllSlots();
                     break;
 
                 case 'client_selectDirection':
@@ -287,6 +294,7 @@ function (dojo, declare, aspect) {
             if (!this.isCurrentPlayerActive()) return;
 
             switch (stateName) {
+                case 'client_selectSlot':
                 case 'client_selectDirection':
                     this.addActionButton(`tap_button-cancel`, _('Cancel'), () => this.onClickCancel(), null, false, 'red'); 
                     break;
@@ -757,7 +765,7 @@ function (dojo, declare, aspect) {
                     // Player needs to pick a direction
                     this.clientStateArgs.selectedMoves = matchingMoves;
                     this.setClientState('client_selectDirection', {
-                        descriptionmyturn: _('${you} must select a direction'),
+                        descriptionmyturn: _('${you} must select a direction to push your Tapas'),
                     });
                     return;
                 }
@@ -797,10 +805,7 @@ function (dojo, declare, aspect) {
                 this.deselectAll();
             }
             catch (err) {
-                // Restore the selections
-                this.clientStateArgs.selectedCoords = selectedCoords;
-                this.clientStateArgs.selectedValue = selectedValue;
-                this.clientStateArgs.selectedDirection = selectedDirection;
+                await this.onClickCancel();
             }
         },
 
@@ -820,7 +825,7 @@ function (dojo, declare, aspect) {
 
         async onClickSlot(x, y) {
             if (!this.amIActive) return;
-            if (this.currentState !== 'playerTurn') return;
+            if (this.currentState !== 'client_selectSlot') return;
             console.log(`onClickSlot(${x}, ${y})`);
 
             // Select the slot that the player clicked
@@ -849,7 +854,7 @@ function (dojo, declare, aspect) {
 
         async onClickInventory(i) {
             if (!this.amIActive) return;
-            if (this.currentState !== 'playerTurn') return;
+            if (this.currentState !== 'playerTurn' && this.currentState !== 'client_selectSlot') return;
             console.log(`onClickInventory(${i})`);
 
             // Select the inventory group that the player clicked
@@ -864,19 +869,24 @@ function (dojo, declare, aspect) {
             }
 
             this.clientStateArgs.selectedValue = i;
-            await this.applySelectionIfPossible();
+
+            if (this.currentState !== 'client_selectSlot') {
+                this.setClientState('client_selectSlot', {
+                    descriptionmyturn: _('${you} must place your selected Tapas'),
+                });
+            }
         },
 
         async onClickCancel() {
-            // Deselect all slots
-            const selectedSlotDivs = [ ...document.querySelectorAll('.tap_slot.tap_selected') ];
-            for (const div of selectedSlotDivs) {
+            // Deselect everything
+            const selectedDivs = [ ...document.querySelectorAll('.tap_selected') ];
+            for (const div of selectedDivs) {
                 div.classList.remove('tap_selected');
             }
 
-            // Remove the selection of which slot to place in
-            // (but we'll keep the tile selection)
             delete this.clientStateArgs.selectedCoords;
+            delete this.clientStateArgs.selectedValue;
+            delete this.clientStateArgs.selectedDirection;
 
             this.restoreServerGameState();
         },
