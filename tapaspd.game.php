@@ -120,9 +120,11 @@ class TapasPD extends Table
     {
         $currentPlayerId = $this->getCurrentPlayerId();
         $tapas = $this->loadGameState();
+        $tapas->getLegalMoves($boardRotations);
         return [
             'tapas' => $tapas->getPlayerData($currentPlayerId),
             'scores' => $tapas->getScores($playerIdWithKetchupMayoWasabi),
+            'rotations' => $tapas->getRotations() + $boardRotations,
         ];
     }
 

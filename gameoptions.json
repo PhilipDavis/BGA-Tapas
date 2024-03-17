@@ -20,5 +20,19 @@
             }
         },
         "default": "1"
+    },
+    "101": {
+        "name": "Burning Head variation",
+        "values": {
+            "1": {
+                "name": "No",
+                "tmdisplay": "Classic game rules"
+            },
+            "2": {
+                "name": "Yes",
+                "tmdisplay": "At the start of each turn of the first player only, rotate the board clockwise a quarter-turn. Each player may only play on one of the lines directly facing him/her."
+            }
+        },
+        "default": "1"
     }
 }

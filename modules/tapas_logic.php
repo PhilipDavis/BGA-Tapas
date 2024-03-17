@@ -178,6 +178,12 @@ class Tapas
         $this->data->board[$index] = $tileId;
     }
 
+    public function isFirstPlayer($playerId)
+    {
+        $playerIds = array_keys((array)$this->data->players);
+        return array_search($playerId, $playerIds) === 0;
+    }
+
     public function getNextPlayerId()
     {
         return $this->data->nextPlayer;
@@ -205,11 +211,6 @@ class Tapas
 
         $legalMoves = $this->getLegalMoves($boardRotations);
 
-        //
-        // ***********************************************************************
-        // NOTE: Burning Head variation rules changed since the logic was written!
-        // ***********************************************************************
-        //
         // First, rotate the board according to Burning Head variation rules
         if ($this->getOption('burningHead'))
             $this->data->rotations += $boardRotations;
@@ -243,34 +244,14 @@ class Tapas
             array_push($displaced, $tile);
         }
 
+        // Place the new tile; set rotation of the tile based on side it's entering from
+        $dir = [ $dx, $dy ];
         if ($this->getOption('burningHead'))
         {
-            //
-            // Note: this logic is not 100% verified yet. it's quite likely wrong!!
-            // As the board rotates, we need to figure out what rotation the tile
-            // should have so that it's orientation matches the direction it's
-            // entering from. In the base game, I originally had everything start
-            // with a rotation index of 300 (meaning upright) because the client
-            // had the tiles starting from inventory piles, which are all upright.
-            // I was trying to animate the tile to the entry slot in Burning Head
-            // but having a lot of difficulty getting it right. I think I should
-            // switch it up to a simpler algorithm where we're animating a clone
-            // that is a child of tap_surface instead of tap_boardwrapper (the 
-            // wrapper is the element that is rotated). Anyways... For the time
-            // being I just turned off the placement animation for Burning Head
-            // and now I'm told that the Burning Head rules have changed. So I'm
-            // not putting any more effort into this variation until after Alpha.
-            //
-            // TODO: $rotation = ...
+            for ($i = 1; $i <= $this->data->rotations % 4; $i++)
+                $dir = $this->rotateDirectionCw($dir);
         }
-        else
-        {
-            // Place the new tile; set rotation based on side entering from
-            $rotation = 100;
-            if ($dx == 1) $rotation = 400;
-            else if ($dx == -1) $rotation = 200;
-            else if ($dy == -1) $rotation = 300;
-        }
+        $rotation = Tapas::getTileRotationFromDirection($dir);
 
         // Add the placed tile at the front of the list
         array_unshift($displaced, $tileId + $rotation);
@@ -488,9 +469,9 @@ class Tapas
             for ($i = 0; $i < $this->data->rotations % 4; $i++)
                 $legalDirection = Tapas::rotateDirectionCcw($legalDirection);
 
-            // And then rotate once for the start of the next turn (except first move of the game)
+            // And then rotate once for the start of the next turn if this is player 1 (except first move of the game)
             $boardRotations = 0;
-            if ($this->data->moves)
+            if ($this->data->moves && $this->isFirstPlayer($playerId))
             {
                 $legalDirection = Tapas::rotateDirectionCcw($legalDirection);
                 $boardRotations++;
@@ -527,6 +508,26 @@ class Tapas
             return true;
 
         return false;
+    }
+
+    //
+    // Return the tile rotation index given a tile direction [ dx, dy ]
+    //
+    static public function getTileRotationFromDirection($dir)
+    {
+        $rotation = 100;
+        if ($dir[0] == 1) $rotation = 400;
+        else if ($dir[0] == -1) $rotation = 200;
+        else if ($dir[1] == -1) $rotation = 300;
+        return $rotation;
+    }
+
+    static public function rotateDirectionCw($dir)
+    {
+        return [
+            -$dir[1],
+            $dir[0]
+        ];
     }
 
     static public function rotateDirectionCcw($dir)

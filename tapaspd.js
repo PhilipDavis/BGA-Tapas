@@ -132,7 +132,7 @@ function (dojo, declare, aspect) {
 
             this.initPreferencesObserver();
 
-            const { tapas } = gamedata;
+            const { tapas, rotations } = gamedata;
             this.tapas = tapas;
 
             this.dontPreloadImage('tapas_tiles-high.png');
@@ -154,10 +154,9 @@ function (dojo, declare, aspect) {
             // Set the rotation
             const wrapperDiv = document.getElementById('tap_board-wrapper');
             if (tapas.options.burningHead) {
-                let { rotations, moves } = tapas;
-                if (moves) rotations++; // The legal moves will pre-rotate the board (but not on the first move)
                 wrapperDiv.style.transform = `rotateZ(${rotations * 90}deg)`;
             }
+            this.clientStateArgs.rotations = rotations;
 
             this.myPlayerId = this.player_id;
             const playerIds = Object.keys(tapas.players).map(s => parseInt(s, 10));
@@ -370,6 +369,20 @@ function (dojo, declare, aspect) {
             return document.getElementById(divId);
         },
 
+        createTileOnTable(tileId, x, y) {
+            if (!tileId) return;
+            const divId = `tap_tile-${tileId % 100}`;
+            const rotation = tileId - (tileId % 100);
+            dojo.place(this.format_block('tapas_Templates.tile', {
+                DIV_ID: divId,
+                TYPE: TapasTiles[tileId % 100],
+                X_EM: x * 5,
+                Y_EM: y * 5,
+                DEG: DegFromRotation[rotation],
+            }), 'tap_table');
+            return document.getElementById(divId);
+        },
+
         createTileInInventory(tileId, playerId) {
             if (!tileId) return;
             const tileType = TapasTiles[tileId % 100];
@@ -484,6 +497,13 @@ function (dojo, declare, aspect) {
             return document.getElementById(`tap_tile-${tileId % 100}`);
         },
 
+        rotateCoords({ x, y }) {
+            return {
+                x: this.tapas.width + 1 - y,
+                y: x,
+            };
+        },
+
         async animateTilePlacementAsync(activePlayerId, tileId, x, y, dx, dy, ignoreCaptured) {
             tileId = tileId % 100;
             const tileDiv = this.getTileDiv(tileId);
@@ -561,42 +581,65 @@ function (dojo, declare, aspect) {
             await Promise.all(animationPromises);
         },
 
-        //
-        // TODO: this is broken... currently a work in progress
-        //
         async animateBurningHeadTilePlacementAsync(activePlayerId, tileId, x, y, dx, dy, ignoreCaptured) {
-            debugger; // KILL
-
             const tileDiv = this.getTileDiv(tileId);
             const srcRect = tileDiv.getBoundingClientRect();
             const srcMidX = Math.round(srcRect.x + srcRect.width / 2);
             const srcMidY = Math.round(srcRect.y + srcRect.height / 2);
+            tileDiv.id = tileDiv.id + '-leaving';
 
-            //
-            // The animation is slightly more complicated in Burning Head where the board is rotating.
-            // If we go with the current animation, the tile will fly in from one of the four sides
-            // as opposed to from the inventory. To fix this, we'd need to pre-rotate the position
-            // of the tile in the opposite direction... or manage the board differently... or create
-            // a clone of the tile on board surface and animate the tile there followed by deleting
-            // the clone and inserting a tile. This last option is going to be easiest.
-            // For now, just make the tile appear in place. (currently needs more work)
-            //
-
-            // Choose an initial tile rotation based on which side of the board
-            // the tile is entering from and how many board rotations have happened.
             const rotations = [ 100, 200, 300, 400 ];
-            for (let i = 0; i < this.tapas.rotations % 4; i++)
-                rotations.unshift(rotations.pop());
+            const trueRotationIndex = dy === 1 ? 0 : dx === -1 ? 1 : dy === -1 ? 2 : 3;
+            const trueRotation = rotations[trueRotationIndex];
+            let apparentRotationIndex = trueRotationIndex;
+            let c2 = { x, y };
+            for (let i = 1; i <= this.clientStateArgs.rotations % 4; i++) {
+                c2 = this.rotateCoords(c2);
+                apparentRotationIndex = (apparentRotationIndex + 1) % 4;
+            }
+            const apparentRotation = rotations[apparentRotationIndex];
+            const deg = DegFromRotation[apparentRotation];
+            const destDiv = this.createTileOnTable(tileId + trueRotation, c2.x, c2.y);
+            destDiv.style.visibility = 'hidden';
+            destDiv.style.zIndex = 10;
 
-            // the [0] player is on left, [1] player is on the right
-            const index =
-                activePlayerId == Object.keys(this.tapas.players)[0]
-                    ? 3 // left side
-                    : 1 // right side
-            ;
-            const tileRotation = rotations[index];
-            this.createTileOnBoard(tileId + tileRotation, x, y);
-            await this.delayAsync(400);
+            // Offset the destination by the offet of the board because
+            // the tile we animate is going to be a child of the table,
+            // not the board wrapper (because board wrapper is rotated)
+            const { offsetLeft, offsetTop } = document.getElementById('tap_board-wrapper');
+
+            const destRect = destDiv.getBoundingClientRect();
+            let destMidX = Math.round(destRect.x + destRect.width / 2);
+            let destMidY = Math.round(destRect.y + destRect.height / 2);
+            
+            const deltaX = destMidX - srcMidX;
+            const deltaY = destMidY - srcMidY;
+
+            const tableDiv = document.getElementById('tap_table');
+            tableDiv.appendChild(destDiv);
+            destDiv.style.left = `calc(${c2.x * 5}em + 1.5em + ${offsetLeft}px)`;
+            destDiv.style.top = `calc(${c2.y * 5}em + 1.5em + ${offsetTop}px)`;
+            destDiv.style.transform = `translate(${-deltaX - offsetLeft}px, ${-deltaY - offsetTop}px) rotateZ(0deg)`;
+            destDiv.style.visibility = '';
+            tileDiv.style.visibility = 'hidden';
+            tileDiv.parentElement.removeChild(tileDiv);
+            
+            const animateToSlot = destDiv.animate({
+                transform: [
+                    `translate(${-deltaX - offsetLeft}px, ${-deltaY - offsetTop}px) rotateZ(0deg)`,
+                    `translate(0, 0) rotateZ(${deg}deg)`,
+                ],
+            }, {
+                duration: 800,
+                easing: 'ease-out',
+                fill: 'forwards',
+            });
+
+            await animateToSlot.finished;
+
+            // Now replace the animated tile with one actually on the board
+            this.createTileOnBoard(tileId + trueRotation, x, y);
+            destDiv.parentElement.removeChild(destDiv);
 
             //
             // Start sliding tiles
@@ -609,7 +652,7 @@ function (dojo, declare, aspect) {
 
             // Slide the first tile, which may start out of bounds
             animationPromises.push(
-                this.animateTileSlideAsync(activePlayerId, tileId + tileRotation, 0, x, y, dx, dy, distanceToMove, ignoreCaptured)
+                this.animateTileSlideAsync(activePlayerId, tileId + trueRotation, 0, x, y, dx, dy, distanceToMove, ignoreCaptured)
             );
 
             // Start sliding the pre-existing tiles
@@ -960,6 +1003,7 @@ function (dojo, declare, aspect) {
                 await this.animateBoardRotationAsync(total - n + i);
                 await this.delayAsync(400);
             }
+            this.clientStateArgs.rotations = total;
         },
     });
 });
