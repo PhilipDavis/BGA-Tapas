@@ -126,6 +126,7 @@ class Tapas
             'version' => 1, // Only need to increment for breaking changes after beta release
             'options' => (array)$options,
             'nextPlayer' => $playerIds[0],
+            'order' => $playerIds,
             'players' => (object)[
                 $playerIds[0] => (object)[
                     'tapas' => $assignment[0],
@@ -140,6 +141,7 @@ class Tapas
             ],
             'lastMove' => [ 0, 0, 0, 0 ], // x, y, dx, dy
             'rotations' => 0, // For Burning Head variation
+            'alreadyRotated' => false, // For Burning Head; indicates if we've already rotated for the first player
             'removed' => [],
             'board' => $board,
             'width' => 6,
@@ -180,8 +182,7 @@ class Tapas
 
     public function isFirstPlayer($playerId)
     {
-        $playerIds = array_keys((array)$this->data->players);
-        return array_search($playerId, $playerIds) === 0;
+        return $this->data->order[0] == $playerId;
     }
 
     public function getNextPlayerId()
@@ -209,19 +210,26 @@ class Tapas
         if ($dx > 1 || $dx < -1 || $dy > 1 || $dy < -1) return false;
         if (!$dx && !$dy) return false;
 
+        $playerId = $this->getNextPlayerId();
+        $otherPlayerId = $this->getOtherPlayerId();
+
         $legalMoves = $this->getLegalMoves($boardRotations);
 
         // First, rotate the board according to Burning Head variation rules
         if ($this->getOption('burningHead'))
+        {
             $this->data->rotations += $boardRotations;
+
+            // Ensure that the first player doesn't rotate the board on second
+            // of two turns (e.g. if the player captured the napkin and got to
+            // play an additional tile)
+            $this->data->alreadyRotated = $this->isFirstPlayer($playerId);
+        }
         
         if (!$this->isLegalMove($legalMoves, $x, $y, $dx, $dy))
             return false;
 
         $this->data->lastMove = [ $x, $y, $dx, $dy ];
-
-        $playerId = $this->getNextPlayerId();
-        $otherPlayerId = $this->getOtherPlayerId();
 
         if (array_search($tileId, $this->data->players->$playerId->inventory) === false)
             return false;
@@ -246,11 +254,6 @@ class Tapas
 
         // Place the new tile; set rotation of the tile based on side it's entering from
         $dir = [ $dx, $dy ];
-        if ($this->getOption('burningHead'))
-        {
-            for ($i = 1; $i <= $this->data->rotations % 4; $i++)
-                $dir = $this->rotateDirectionCw($dir);
-        }
         $rotation = Tapas::getTileRotationFromDirection($dir);
 
         // Add the placed tile at the front of the list
@@ -469,9 +472,10 @@ class Tapas
             for ($i = 0; $i < $this->data->rotations % 4; $i++)
                 $legalDirection = Tapas::rotateDirectionCcw($legalDirection);
 
-            // And then rotate once for the start of the next turn if this is player 1 (except first move of the game)
+            // Rotate once for the start of the next turn if this is player 1 (except first move of the game).
+            // Do not rotate the board if the first player is taking a second turn in a row.
             $boardRotations = 0;
-            if ($this->data->moves && $this->isFirstPlayer($playerId))
+            if ($this->data->moves && $this->isFirstPlayer($playerId) && !$this->data->alreadyRotated)
             {
                 $legalDirection = Tapas::rotateDirectionCcw($legalDirection);
                 $boardRotations++;
