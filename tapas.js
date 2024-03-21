@@ -162,8 +162,18 @@ function (dojo, declare, aspect) {
             const playerIds = Object.keys(tapas.players).map(s => parseInt(s, 10));
             this.otherPlayerId = playerIds.filter(id => id !== this.myPlayerId).shift();
 
-            this.createCapturedArea(this.myPlayerId);
-            this.createCapturedArea(this.otherPlayerId);
+            function sortMeFirst(a, b) {
+                if (a == this.myPlayerId) return -1;
+                if (b == this.myPlayerId) return 1;
+                // For spectator mode, the order doesn't really matter
+                return Number(a) - Number(b);
+            }
+
+            // Note: in case of a spectator, myPlayerId is going to
+            // be the observer rather than one of the actual players.
+            for (const playerId of [ ...playerIds ].sort(sortMeFirst)) {
+                this.createCapturedArea(playerId);
+            }
 
             let index = 1;
             for (const [ playerId, player ] of Object.entries(tapas.players))
@@ -201,7 +211,8 @@ function (dojo, declare, aspect) {
             }
 
             for (let i = 1; i <= 4; i++) {
-                document.getElementById(`tap_inventory-${this.myPlayerId}-${i}`).addEventListener('click', () => this.onClickInventory(i));
+                const invGroupDiv = document.getElementById(`tap_inventory-${this.myPlayerId}-${i}`);
+                invGroupDiv?.addEventListener('click', () => this.onClickInventory(i));
             }
 
             this.setupNotifications();
