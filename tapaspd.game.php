@@ -30,11 +30,6 @@ class TapasPD extends Table
         parent::__construct();
         
         self::initGameStateLabels([
-            // KILL:
-            // Use this to determine on the client side whether we need to animate
-            // the initial setup of the game.
-            //"gameStarted" => 10,
-
             // Game Options
             "redMojo" => 100,
             "burningHead" => 101,
@@ -459,13 +454,8 @@ class TapasPD extends Table
                 $this->saveGameState($tapas);
         
                 $this->afterPlaceTile($tapas, $zombiePlayerId, $tileId, $move[0], $move[1], $move[2], $move[3], $captured);
-
-                // KILL/KEEP? the previous zombie code did this commented-out line
-                //            (and not what happens in afterPlaceTile -- `$this->gamestate->nextState('endTurn');`)
-                //$this->gamestate->changeActivePlayer($tapas->getNextPlayerId());
-                break;
+                return;
         }
-        return;
     }
 
     
