@@ -2,7 +2,7 @@
  /**
   *------
   * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
-  * TapasPD implementation : © Copyright 2024, Philip Davis (mrphilipadavis AT gmail)
+  * Tapas implementation : © Copyright 2024, Philip Davis (mrphilipadavis AT gmail)
   * 
   * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
   * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -17,7 +17,7 @@ define('TAPAS_BURNINGHEAD_NO', 1);
 define('TAPAS_BURNINGHEAD_YES', 2);
 
 
-class TapasPD extends Table
+class Tapas extends Table
 {
 	function __construct()
 	{
@@ -39,7 +39,7 @@ class TapasPD extends Table
     protected function getGameName()
     {
 		// Used for translations and stuff. Please do not modify.
-        return "tapaspd";
+        return "tapas";
     }	
 
     //
@@ -99,7 +99,7 @@ class TapasPD extends Table
             'burningHead' => $this->getGameStateValue('burningHead') == TAPAS_BURNINGHEAD_YES,
         ];
         
-        $tapas = Tapas::newGame($playerIds, $tapasOptions);
+        $tapas = TapasLogic::newGame($playerIds, $tapasOptions);
         $this->initializeGameState($tapas);
 
         // Must set the first active player
@@ -147,7 +147,7 @@ class TapasPD extends Table
     protected function loadGameState()
     {
         $json = $this->getObjectFromDB("SELECT id, doc FROM game_state LIMIT 1")['doc'];
-        return Tapas::fromJson($json);
+        return TapasLogic::fromJson($json);
     }
 
     protected function saveGameState($tapas)

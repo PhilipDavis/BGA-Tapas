@@ -2,14 +2,14 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * TapasPD implementation : © Copyright 2024, Philip Davis (mrphilipadavis AT gmail)
+ * Tapas implementation : © Copyright 2024, Philip Davis (mrphilipadavis AT gmail)
  *
  * This code has been produced on the BGA studio platform for use on https://boardgamearena.com.
  * See http://en.doc.boardgamearena.com/Studio for more information.
  * -----
  */
 
-class action_tapaspd extends APP_GameAction
+class action_tapas extends APP_GameAction
 { 
     // Constructor: please do not modify
    	public function __default()
@@ -21,7 +21,7 @@ class action_tapaspd extends APP_GameAction
   	    }
   	    else
   	    {
-            $this->view = "tapaspd_tapaspd";
+            $this->view = "tapas_tapas";
             self::trace("Complete reinitialization of board game");
         }
   	}

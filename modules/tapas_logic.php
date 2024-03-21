@@ -17,7 +17,7 @@ define('TAPAS_TILETYPE_WASABI', 13);
 define('TAPAS_TILETYPE_TOAST', 14);
 
 
-class Tapas
+class TapasLogic
 {
     private $data;
 
@@ -60,7 +60,7 @@ class Tapas
 
     static function fromJson($json)
     {
-        return new Tapas(json_decode($json));
+        return new TapasLogic(json_decode($json));
     }
 
     static function newGame($playerIds, $options)
@@ -103,7 +103,7 @@ class Tapas
         
         foreach ($specialSlots as $coords)
         {
-            $index = Tapas::_makeIndex($coords[0], $coords[1], 6);
+            $index = TapasLogic::_makeIndex($coords[0], $coords[1], 6);
             $rotations = [ 100, 200, 300, 400 ];
             //shuffle($rotations); // Nah, don't randomize the rotation on Extras tiles -- looks better if they're all upright at start
             $board[$index] = $rotations[2] + array_pop($extraTiles);
@@ -122,7 +122,7 @@ class Tapas
         ];
         shuffle($assignment);
 
-        return new Tapas((object)[
+        return new TapasLogic((object)[
             'version' => 1, // Only need to increment for breaking changes after beta release
             'options' => (array)$options,
             'nextPlayer' => $playerIds[0],
@@ -156,7 +156,7 @@ class Tapas
     //
     private function makeIndex($x, $y)
     {
-        return Tapas::_makeIndex($x, $y, $this->data->width); 
+        return TapasLogic::_makeIndex($x, $y, $this->data->width); 
     }
     
     public static function _makeIndex($x, $y, $w)
@@ -254,7 +254,7 @@ class Tapas
 
         // Place the new tile; set rotation of the tile based on side it's entering from
         $dir = [ $dx, $dy ];
-        $rotation = Tapas::getTileRotationFromDirection($dir);
+        $rotation = TapasLogic::getTileRotationFromDirection($dir);
 
         // Add the placed tile at the front of the list
         array_unshift($displaced, $tileId + $rotation);
@@ -470,14 +470,14 @@ class Tapas
 
             // Take current rotations into account
             for ($i = 0; $i < $this->data->rotations % 4; $i++)
-                $legalDirection = Tapas::rotateDirectionCcw($legalDirection);
+                $legalDirection = TapasLogic::rotateDirectionCcw($legalDirection);
 
             // Rotate once for the start of the next turn if this is player 1 (except first move of the game).
             // Do not rotate the board if the first player is taking a second turn in a row.
             $boardRotations = 0;
             if ($this->data->moves && $this->isFirstPlayer($playerId) && !$this->data->alreadyRotated)
             {
-                $legalDirection = Tapas::rotateDirectionCcw($legalDirection);
+                $legalDirection = TapasLogic::rotateDirectionCcw($legalDirection);
                 $boardRotations++;
             }
 
@@ -493,7 +493,7 @@ class Tapas
                 // Rather than actually rotate the board 90deg clockwise,
                 // we'll just rotate the legal direction -90deg and then
                 // rely on the client UI to rotate the board.
-                $legalDirection = Tapas::rotateDirectionCcw($legalDirection);
+                $legalDirection = TapasLogic::rotateDirectionCcw($legalDirection);
             }
             $legalMoves = array_values($burningHeadLegalMoves);
         }
