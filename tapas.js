@@ -132,7 +132,7 @@ function (dojo, declare, aspect) {
 
             this.initPreferencesObserver();
 
-            const { tapas, rotations } = gamedata;
+            const { tapas, rotations, scores } = gamedata;
             this.tapas = tapas;
 
             this.dontPreloadImage('tapas_tiles-high.png');
@@ -192,7 +192,7 @@ function (dojo, declare, aspect) {
                 this.scoreCounter[playerId].create(`player_score_${playerId}`);
                 // Note: can't set the value immediately... perhaps the div isn't created yet.
                 // Let events happen first and then set the value.
-                setTimeout(() => this.setPlayerScore(playerId, 0));
+                setTimeout(() => this.setPlayerScore(playerId, scores[playerId]), 0);
             }
 
             for (let y = 1; y <= tapas.height; y++) {
