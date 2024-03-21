@@ -325,3 +325,32 @@
 .tap_log-tile-10 { background-position-x: -3em; background-position-y: -12em; }
 .tap_log-tile-12 { background-position-x: -3em; background-position-y: -15em; }
 .tap_log-tile-14 { background-position-x: -3em; background-position-y: -18em; }
+
+
+
+@media screen and (orientation:portrait) {
+    #tap_table {
+        font-size: 1.25em;
+        flex-direction: column;
+        height: unset;
+    }
+    
+    .tap_inventory {
+        flex-direction: row;
+        min-width: unset;
+        min-height: 5.25em;
+    }
+    .tap_inventory-group {
+        flex-direction: row;
+        margin: 0 0.5em;
+    }
+
+    .tap_inventory .tap_tile {
+        margin-top: unset;
+        margin-left: -3em;
+    }
+    .tap_inventory .tap_tile:first-child {
+        margin-top: unset;
+        margin-left: 0;
+    }
+}
