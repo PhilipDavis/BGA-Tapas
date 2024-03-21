@@ -1,1 +1,21 @@
-{}
+{
+    "300": {
+        "name": "Show Available Directions",
+        "needReload": false,
+        "values": {
+            "1": {
+                "name": "Disabled",
+                "cssPref": "tap_pref-arrows-off"
+            },
+            "2": {
+                "name": "Show on Hover",
+                "cssPref": "tap_pref-arrows-hover"
+            },
+            "3": {
+                "name": "Always Visible",
+                "cssPref": "tap_pref-arrows-always"
+            }
+        },
+        "default": 2
+    }
+}

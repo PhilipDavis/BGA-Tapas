@@ -95,7 +95,7 @@ function (dojo, declare, aspect) {
     const SlideDuration = 400;
 
     const Preference = {
-        // KILL: ShowColumnSums: 300,
+        ShowAvailableDirections: 300,
     };
 
     return declare(`bgagame.${BgaGameId}`, ebg.core.gamegui, {

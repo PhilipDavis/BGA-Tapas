@@ -245,6 +245,14 @@
 .tap_slot.tap_selected .tap_arrow-left  { transform: translate(-1em, 0); }
 .tap_slot.tap_selected .tap_arrow-up    { transform: translate(0, -1em); }
 
+.tap_pref-arrows-off .tap_slot .tap_arrow { opacity: 0 !important; display: none; }
+
+.tap_pref-arrows-always .tap_slot .tap_arrow { opacity: .75 !important; }
+.tap_pref-arrows-always .tap_slot .tap_arrow-right { transform: translate(1em, 0); }
+.tap_pref-arrows-always .tap_slot .tap_arrow-down  { transform: translate(0, 1em); }
+.tap_pref-arrows-always .tap_slot .tap_arrow-left  { transform: translate(-1em, 0); }
+.tap_pref-arrows-always .tap_slot .tap_arrow-up    { transform: translate(0, -1em); }
+
 .tap_dir-slot .tap_arrow {
     opacity: 1;
     transition: none;
