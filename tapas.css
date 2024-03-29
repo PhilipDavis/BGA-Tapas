@@ -42,7 +42,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 5.25em;
+    min-width: 6.25em;
     z-index: 0;
 }
 .tap_inventory-group {
@@ -99,12 +99,15 @@
 
 .tap_inventory .tap_tile {
     position: relative;
-    margin-top: -3em;
+    margin-top: -2em;
     left: 0;
     top: 0;
 }
 .tap_inventory .tap_tile:first-child {
     margin-top: 0;
+}
+.tap_inventory .tap_tile:nth-child(even) {
+    left: 1em;
 }
 
 #tap_board-wrapper {
@@ -355,7 +358,7 @@
     .tap_inventory {
         flex-direction: row;
         min-width: unset;
-        min-height: 5.25em;
+        min-height: 6.25em;
     }
     .tap_inventory-group {
         flex-direction: row;
@@ -364,10 +367,14 @@
 
     .tap_inventory .tap_tile {
         margin-top: unset;
-        margin-left: -3em;
+        margin-left: -2em;
     }
     .tap_inventory .tap_tile:first-child {
         margin-top: unset;
         margin-left: 0;
+    }
+    .tap_inventory .tap_tile:nth-child(even) {
+        left: unset;
+        top: 1em;
     }
 }
