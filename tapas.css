@@ -8,8 +8,17 @@
  * -----
  */
 
+#tap_body {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+}
+
 #tap_surface {
     position: relative;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
 }
 #tap_surface * {
     box-sizing: border-box;

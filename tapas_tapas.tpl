@@ -10,13 +10,15 @@
 -------
 -->
 
-<div id="tap_surface">
-    <div id="tap_table">
-        <div id="tap_inventory-1"></div>
-        <div id="tap_board-wrapper">
-            <div id="tap_board"></div>
+<div id="tap_body">
+    <div id="tap_surface">
+        <div id="tap_table">
+            <div id="tap_inventory-1"></div>
+            <div id="tap_board-wrapper">
+                <div id="tap_board"></div>
+            </div>
+            <div id="tap_inventory-2"></div>
         </div>
-        <div id="tap_inventory-2"></div>
     </div>
 </div>
 
