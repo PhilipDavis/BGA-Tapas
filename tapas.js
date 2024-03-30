@@ -94,6 +94,9 @@ function (dojo, declare, aspect) {
     // How many milliseconds for a tile to slide one position
     const SlideDuration = 400;
 
+    // How many milliseconds to hover before showing a tooltip
+    const ToolTipDelay = 500;
+
     const Preference = {
         ShowAvailableDirections: 300,
     };
@@ -134,6 +137,16 @@ function (dojo, declare, aspect) {
 
             const { tapas, rotations, scores } = gamedata;
             this.tapas = tapas;
+
+            const ketchupMayoWasabiTooltipText = _('<b>Ketchup, Mayonnaise, and Wasabi tiles</b>: In the final count, a player holding 1 of these tiles earns 2 points; holding 2 earns 5 points. A player who collects all 3 tiles automatically wins the game!');
+            this.toolTipText = {
+                '37': _('<b>Toast tile</b>: When it exits the board, the player whose turn it is claims it. It is worth 5 points in the final count.'),
+                '38': ketchupMayoWasabiTooltipText,
+                '39': ketchupMayoWasabiTooltipText,
+                '40': ketchupMayoWasabiTooltipText,
+                '41': _('<b>Napkin tile</b>: When you claim this token, you play again immediately.'),
+                '42': _('<b>Ticket tile</b>: When this tile is removed from the board, all Tapas that are also removed that turn are removed from the game and won\'t be worth any points at the end.'),
+            };
 
             this.dontPreloadImage('tapas_tiles-high.png');
             this.dontPreloadImage('tapas_board-1-med.png');
@@ -213,6 +226,10 @@ function (dojo, declare, aspect) {
             for (let i = 1; i <= 4; i++) {
                 const invGroupDiv = document.getElementById(`tap_inventory-${this.myPlayerId}-${i}`);
                 invGroupDiv?.addEventListener('click', () => this.onClickInventory(i));
+            }
+
+            for (let tileId = 37; tileId <= 42; tileId++) {
+                this.createTileTooltip(tileId);
             }
 
             this.setupNotifications();
@@ -357,6 +374,17 @@ function (dojo, declare, aspect) {
                 TITLE: playerId === 'nobody' ? _('Nobody') : this.gamedatas.players[playerId].name,
                 TAPAS: playerId === 'nobody' ? 'ticket' : this.tapas.players[playerId].tapas,
             }), 'tap_surface');
+        },
+
+        createTileTooltip(tileId) {
+            const text = this.toolTipText[tileId];
+            if (!text) return;
+            const html = this.format_block('tapas_Templates.tooltip', {
+                CARD_ID: tileId,
+                TYPE: TapasTiles[tileId % 100],
+                TEXT: text,
+            });
+            this.addTooltipHtml(`tap_tile-${tileId % 100}`, html, ToolTipDelay);
         },
 
         createInventory(playerId, index, tapasType) {
@@ -765,6 +793,9 @@ function (dojo, declare, aspect) {
                 easing: 'ease-out',
                 fill: 'forwards',
             }).finished;
+
+            // Need to recreate the tool tip because the old tile with tool tip was deleted from DOM
+            this.createTileTooltip(tileId);
         },
 
         async animateBoardRotationAsync(rotations) {

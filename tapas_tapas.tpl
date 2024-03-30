@@ -54,6 +54,15 @@ const tapas_Templates = {
             'class="tap_arrow tap_arrow-${DIR}" ' +
         '></div>',
 
+    tooltip:
+        '<div class="tap_tooltip">' +
+            '<div class="tap_tile tap_tile-${TYPE}">' +
+            '</div>' +
+            '<span class="tap_tooltip-text">' +
+                '${TEXT}' +
+            '</span>' +
+        '</div>',
+
     captured:
         '<div id="tap_captured-${PID}" class="tap_captured whiteblock">' +
             '<h2>' +
