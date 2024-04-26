@@ -232,7 +232,7 @@ class Tapas extends Table
     // or a zombie player. The logic is extracted into a shared function
     // to ensure same behaviour for both cases.
     //
-    function afterPlaceTile($tapas, $activePlayerId, $tileId, $x, $y, $dx, $dy, $captured)
+    function afterPlaceTile(TapasLogic $tapas, $activePlayerId, $tileId, $x, $y, $dx, $dy, $captured)
     {
         //
         // Update score in the database
@@ -305,26 +305,31 @@ class Tapas extends Table
         //
         // Send notifications to players
         //
-        $this->notifyAllPlayers('tilePlayed', clienttranslate('${playerName} plays ${tileId:getTileHtml}'), [
+        $this->notifyAllPlayers('tilePlayed', clienttranslate('${playerName} plays ${_tile}'), [
+            'i18n' => [ '_tile' ],
             'playerName' => $this->getPlayerNameById($activePlayerId),
             'playerId' => $activePlayerId,
-            'tileId' => $tileId,
+            '_tile' => $tapas->getTileLabel($tileId),
+            'tile' => $tileId,
             'x' => $x,
             'y' => $y,
             'dx' => $dx,
             'dy' => $dy,
             'board' => $tapas->getBoard(),
             'scores' => $scores,
-            'preserve' => [ 'playerId', 'x', 'y', 'dx', 'dy', 'board', 'scores' ],
+            'preserve' => [ 'playerId', 'x', 'y', 'dx', 'dy', 'board', 'scores', 'tile' ],
         ]);
 
         foreach ($captured as $playerId => $tileIds)
         {
             if (!count($tileIds))
                 continue;
-            $this->notifyAllPlayers('tilesCaptured', clienttranslate('${playerName} captures ${tileIds:getTilesHtml}'), [
+            $this->notifyAllPlayers('tilesCaptured', clienttranslate('${playerName} captures ${_tiles}'), [
+                'i18n' => [ '_tiles' ],
                 'playerName' => $playerId == 'nobody' ? clienttranslate('Nobody') : $this->getPlayerNameById($playerId),
-                'tileIds' => $tileIds,
+                '_tiles' => implode(", ", array_values(array_map(fn($tileId) => $tapas->getTileLabel($tileId), $tileIds))),
+                'tiles' => $tileIds,
+                'preserve' => [ 'tiles' ],
             ]);
         }
 
@@ -332,11 +337,16 @@ class Tapas extends Table
         // (unless the game is over now from ketchup, mayo, and wasabi)
         if ($playerIdWithKetchupMayoWasabi)
         {
-            $this->notifyAllPlayers('earlyFinish', clienttranslate('${playerName} has captured all three of ${tileId1:getTileHtml}, ${tileId2:getTileHtml}, and ${tileId3:getTileHtml}'), [
+            $this->notifyAllPlayers('earlyFinish', clienttranslate('${playerName} has captured all three of ${_tile38}, ${_tile39}, and ${_tile40}'), [
+                'i18n' => [ '_tile' ],
                 'playerName' => $this->getPlayerNameById($activePlayerId),
-                'tileId1' => 38, // ketchup
-                'tileId2' => 39, // mayo
-                'tileId3' => 40, // wasabi
+                '_tile38' => $tapas->getTileLabel(38),
+                '_tile39' => $tapas->getTileLabel(39),
+                '_tile40' => $tapas->getTileLabel(40),
+                'tile38' => 38, // ketchup
+                'tile39' => 39, // mayo
+                'tile40' => 40, // wasabi
+                'preserve' => [ 'tile38', 'tile39', 'tile40' ],
             ]);
         }
         else if ($tapas->getNextPlayerId() == $activePlayerId)

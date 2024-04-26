@@ -31,31 +31,71 @@ class TapasLogic
 
         foreach (range(1, 12) as $i)
         {
-            $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_JALA_1, 'tapas' => 'jala', 'value' => 1 ];
-            $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_CROQ_1, 'tapas' => 'croq', 'value' => 1 ];
+            $this->TapasTiles[] = [
+                'type' => TAPAS_TILETYPE_JALA_1,
+                'tapas' => 'jala',
+                'value' => 1,
+                'label' => clienttranslate('Jalapeños |'),
+            ];
+            $this->TapasTiles[] = [
+                'type' => TAPAS_TILETYPE_CROQ_1,
+                'tapas' => 'croq',
+                'value' => 1,
+                'label' => clienttranslate('Croquetas |'),
+            ];
         }
         
         foreach (range(1, 3) as $i)
         {
-            $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_JALA_2, 'tapas' => 'jala', 'value' => 2 ];
-            $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_CROQ_2, 'tapas' => 'croq', 'value' => 2 ];
+            $this->TapasTiles[] = [
+                'type' => TAPAS_TILETYPE_JALA_2,
+                'tapas' => 'jala',
+                'value' => 2,
+                'label' => clienttranslate('Jalapeños ||'),
+            ];
+            $this->TapasTiles[] = [
+                'type' => TAPAS_TILETYPE_CROQ_2,
+                'tapas' => 'croq',
+                'value' => 2,
+                'label' => clienttranslate('Croquetas ||'),
+            ];
         }
         
         foreach (range(1, 2) as $i)
         {
-            $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_JALA_3, 'tapas' => 'jala', 'value' => 3 ];
-            $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_CROQ_3, 'tapas' => 'croq', 'value' => 3 ];
+            $this->TapasTiles[] = [
+                'type' => TAPAS_TILETYPE_JALA_3,
+                'tapas' => 'jala',
+                'value' => 3,
+                'label' => clienttranslate('Jalapeños |||'),
+            ];
+            $this->TapasTiles[] = [
+                'type' => TAPAS_TILETYPE_CROQ_3,
+                'tapas' => 'croq',
+                'value' => 3,
+                'label' => clienttranslate('Croquetas |||'),
+            ];
         }
         
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_JALA_4, 'tapas' => 'jala', 'value' => 4 ];
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_CROQ_4, 'tapas' => 'croq', 'value' => 4 ];
-        
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_TOAST, 'tapas' => 'extra' ];
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_KETCHUP, 'tapas' => 'extra' ]; // 38
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_MAYO, 'tapas' => 'extra' ]; // 39
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_WASABI, 'tapas' => 'extra' ]; // 40
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_NAPKIN, 'tapas' => 'extra' ];
-        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_TICKET, 'tapas' => 'extra' ];
+        $this->TapasTiles[] = [
+            'type' => TAPAS_TILETYPE_JALA_4,
+            'tapas' => 'jala',
+            'value' => 4,
+            'label' => clienttranslate('Jalapeños ||||'),
+        ];
+        $this->TapasTiles[] = [
+            'type' => TAPAS_TILETYPE_CROQ_4,
+            'tapas' => 'croq',
+            'value' => 4,
+            'label' => clienttranslate('Croquetas ||||'),
+        ];
+    
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_TOAST, 'tapas' => 'extra', 'label' => clienttranslate('Toast') ];
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_KETCHUP, 'tapas' => 'extra', 'label' => clienttranslate('Ketchup') ]; // 38
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_MAYO, 'tapas' => 'extra', 'label' => clienttranslate('Mayonnaise') ]; // 39
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_WASABI, 'tapas' => 'extra', 'label' => clienttranslate('Wasabi') ]; // 40
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_NAPKIN, 'tapas' => 'extra', 'label' => clienttranslate('Napkin') ];
+        $this->TapasTiles[] = [ 'type' => TAPAS_TILETYPE_TICKET, 'tapas' => 'extra', 'label' => clienttranslate('Ticket') ];
     }
 
     static function fromJson($json)
@@ -551,6 +591,12 @@ class TapasLogic
     {
         $tile = $this->TapasTiles[$tileId % 100];
         return array_key_exists('value', $tile) ? $tile['value'] : 0;
+    }
+
+    public function getTileLabel($tileId)
+    {
+        $tile = $this->TapasTiles[$tileId % 100];
+        return $tile['label'];
     }
 
     public function getBoard()

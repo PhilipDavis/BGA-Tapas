@@ -107,8 +107,42 @@ function (dojo, declare, aspect) {
             this.clientStateArgs = {
             };
 
-            // Enable function calling in string substitution (for writing HTML in log entries)
+            //
+            // Intercept calls for string substitution so we can inject rich content into log entries
+            //
             aspect.before(dojo.string, "substitute", (template, map, transform) => {
+                if (typeof map === 'object') {
+                    for (const key of Object.keys(map)) {
+                        if (key.startsWith('_')) {
+                            // This key/value pair is strictly for the replay logs, which don't have access
+                            // to the images, CSS, nor JavaScript of the game page. We want to replace them
+                            // with rich content for the in-game log.  Strip the leading underscore to find
+                            // the name of the data key (which must have been sent from server side) and we
+                            // replace the old key with the rich content.
+                            const dataKey = key.substring(1);
+                            const dataValue = map[dataKey];
+                            if (dataValue !== undefined) {
+                                switch (dataKey) {
+                                    case 'tile':
+                                        map[key] = this.getTileHtml(dataValue);
+                                        break;
+                                    case 'tile38':
+                                        map[key] = this.getTileHtml(38);
+                                        break;
+                                    case 'tile39':
+                                        map[key] = this.getTileHtml(39);
+                                        break;
+                                    case 'tile40':
+                                        map[key] = this.getTileHtml(40);
+                                        break;
+                                    case 'tiles':
+                                        map[key] = this.getTilesHtml(dataValue);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
                 return [ template, map, transform, this ];
             });
 
@@ -175,7 +209,7 @@ function (dojo, declare, aspect) {
             const playerIds = Object.keys(tapas.players).map(s => parseInt(s, 10));
             this.otherPlayerId = playerIds.filter(id => id !== this.myPlayerId).shift();
 
-            function sortMeFirst(a, b) {
+            const sortMeFirst = (a, b) => {
                 if (a == this.myPlayerId) return -1;
                 if (b == this.myPlayerId) return 1;
                 // For spectator mode, the order doesn't really matter
@@ -998,10 +1032,11 @@ function (dojo, declare, aspect) {
 
         setupNotifications() {
             console.log('notifications subscriptions setup');
-            const eventNames = [
-                'tilePlayed',
-                'boardRotated',
-            ];
+            const eventNames = Object.getOwnPropertyNames(this.__proto__).reduce((all, name) => {
+                const match = /^notify_(.+?)$/.exec(name);
+                match && all.push(match[1]);
+                return all;
+            }, []);
             for (const eventName of eventNames) {
                 dojo.subscribe(eventName, this, async data => {
                     const fnName = `notify_${eventName}`;
@@ -1015,9 +1050,10 @@ function (dojo, declare, aspect) {
                 });
                 this.notifqueue.setSynchronous(eventName);
             }
+            console.log(`Registered ${eventNames.length} event handlers`);
         },
 
-        async notify_tilePlayed({ playerId, tileId, x, y, dx, dy, board, scores }) {
+        async notify_tilePlayed({ playerId, tile: tileId, x, y, dx, dy, board, scores }) {
             // Update the internal game state
             this.tapas.players[playerId].inventory = this.tapas.players[playerId].inventory.filter(id => id != tileId);
 
